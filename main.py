@@ -52,12 +52,24 @@ def get_songs_by_artist(token, artist_id):
     json_result = json.loads(result.content)["tracks"]
     return json_result
 
+def get_songs_features(token, song_ids):
+    url = "https://api.spotify.com/v1/audio-features"
+    headers = get_auth_header(token)
+    query = "?ids=" + ",".join(song_ids)
+    query_url = url + query
+    result = get(query_url, headers=headers)
+    json_result = json.loads(result.content)["audio_features"]
+    return json_result
 
 
 token = get_token()
 result = search_for_artist(token, "Travis Scott")
 artist_id = result["id"]
 songs = get_songs_by_artist(token, artist_id)
+song_ids= [song["id"] for song in songs]
+song_names = [song["name"] for song in songs]
+song_features = get_songs_features(token, song_ids)
 
-for idx, song in enumerate(songs):
-    print(f"{idx + 1}. {song['name']}")
+for idx, feature in enumerate(song_features):
+        print(f"{idx + 1}. {song_names[idx]} - {feature['danceability']}, {feature['energy']}, {feature['valence']}")
+
